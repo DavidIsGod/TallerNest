@@ -1,0 +1,4 @@
+# Ejecuta lint y pruebas unitarias antes de cada push.
+# Las pruebas e2e (requieren PostgreSQL) corren en GitHub Actions.
+npm run lint:check
+npm test -- --silent

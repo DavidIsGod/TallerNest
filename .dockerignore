@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+coverage-e2e
+.git
+.github
+.husky
+.env
+*.pdf
+postman
+docs
