@@ -4,6 +4,8 @@ Backend de **MediPlan**: un sistema para gestionar y seguir los medicamentos de 
 
 MediPlan permite a pacientes/cuidadores registrar sus medicamentos y horarios, marcar cada dosis como tomada u omitida y generar reportes de adherencia (también en PDF). Los familiares remotos pueden monitorear el tratamiento en modo solo lectura y reciben alertas (Twilio SMS/WhatsApp) cuando se omite una dosis. Al registrar un medicamento se consulta **openFDA** para mostrar advertencias e interacciones.
 
+> **App desplegada:** <https://mediplan-api-sm1x.onrender.com/api> · Swagger: <https://mediplan-api-sm1x.onrender.com/api/docs>
+
 > El informe técnico detallado (endpoints, parámetros, respuestas, autenticación, autorización y persistencia) está en [`docs/INFORME.md`](docs/INFORME.md).
 
 ---

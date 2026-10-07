@@ -13,6 +13,7 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
+  ApiHeader,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -61,6 +62,11 @@ export class AuthController {
   @ApiTooManyRequestsResponse({
     description: 'Máx. 5 intentos por minuto por IP y email',
   })
+  @ApiHeader({
+    name: 'user-agent',
+    required: false,
+    description: 'Se guarda en la sesión (opcional)',
+  })
   login(@Body() dto: LoginDto, @Headers('user-agent') userAgent?: string) {
     return this.authService.login(dto, userAgent);
   }
@@ -71,6 +77,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Segundo paso del login con código TOTP' })
   @ApiUnauthorizedResponse({ description: 'Código o token temporal inválido' })
+  @ApiHeader({
+    name: 'user-agent',
+    required: false,
+    description: 'Se guarda en la sesión (opcional)',
+  })
   verifyTwoFactor(
     @Body() dto: VerifyTwoFactorDto,
     @Headers('user-agent') userAgent?: string,

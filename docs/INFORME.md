@@ -4,7 +4,9 @@
 **Taller:** Backend – NestJS
 **Proyecto:** MediPlan, sistema de gestión y seguimiento de medicamentos para adultos mayores y sus cuidadores
 **Repositorio:** `https://github.com/ICESI-CI3/icesi-2026b-nestjs-taller-group-9`
-**Aplicación desplegada:** `https://<su-servicio>.onrender.com/api` (Swagger en `/api/docs`). *Actualizar tras el despliegue.*
+**Repositorio de despliegue (fork):** `https://github.com/DavidIsGod/TallerNest`. Render no tiene permisos sobre la organización ICESI-CI3, así que se despliega desde un fork.  
+**Aplicación desplegada:** <https://mediplan-api-sm1x.onrender.com/api>  
+**Swagger:** <https://mediplan-api-sm1x.onrender.com/api/docs> · **Health:** <https://mediplan-api-sm1x.onrender.com/api/health>
 
 ---
 
@@ -258,14 +260,32 @@ Prefijo: `/api`. Las columnas *Params* indican body (B), query (Q) y path (P). L
 - **Unitarias**: cubren servicios (reglas de negocio, casos de error), controladores, guards, la estrategia JWT, el filtro de excepciones, el interceptor, las utilidades de fecha y zona horaria, los cálculos de reportes, la generación de PDF, el cliente de openFDA (con `fetch` simulado), el cliente de Twilio, el scheduler y el seed. El umbral mínimo de 80 % está configurado en `package.json` (`coverageThreshold`) y el pipeline falla si no se alcanza.
 - **Integración** (`test/*.e2e-spec.ts`): levantan la aplicación completa (`AppModule` + `setupApp`) sobre la base `mediplan_test`, que se recrea en cada suite aplicando las migraciones. Cubren registro, login, refresh con rotación, 2FA completo (setup, enable, login en 2 pasos y disable), cambio de contraseña, logout con revocación inmediata, administración de roles con efecto inmediato, desactivación de usuarios, seed, CRUD de medicamentos con validaciones, permisos FAMILY/CAREGIVER/ADMIN, generación idempotente de tomas, marcado y transiciones, notificación por omisión, job de omisiones, reglas de contactos, todos los reportes y la descarga del PDF.
 
-*(Adjunte aquí capturas de `npm run test:cov`, `npm run test:e2e` y de la ejecución del pipeline en GitHub Actions.)*
+### 6.1 Evidencias
+
+**Pruebas unitarias y cobertura** (`npm run test:cov`): 207 pruebas, 98.84 % de statements.
+
+![Pruebas unitarias y cobertura](capturas/01-pruebas-unitarias-cobertura.png)
+
+**Pruebas de integración** (`npm run test:e2e`): 57 pruebas contra PostgreSQL.
+
+![Pruebas de integración e2e](capturas/02-pruebas-integracion-e2e.png)
 
 ## 7. Despliegue y CI/CD
 
 - **Contenedor**: `Dockerfile` multi-etapa (node:24-alpine), corre como usuario sin privilegios.
-- **Nube**: Render (`render.yaml` crea PostgreSQL y el servicio web, con health check en `/api/health`).
+- **Nube**: Render (`render.yaml` crea PostgreSQL y el servicio web, con health check en `/api/health`). URL pública: <https://mediplan-api-sm1x.onrender.com/api>. En el plan gratuito el servicio se duerme tras 15 min sin uso, y la primera petición tarda unos 50 s.
 - **Pipeline** (`.github/workflows/ci-cd.yml`): `lint-unit` (ESLint, build, Jest con cobertura) y `e2e` (servicio PostgreSQL) se ejecutan en cada push y PR. El job `deploy` corre solo en `main` si los anteriores pasan: dispara el deploy hook de Render y verifica el health check.
 - **Antes del push**: un hook de Husky (`.husky/pre-push`) ejecuta lint y pruebas unitarias.
+
+**Pipeline en GitHub Actions**: lint y pruebas unitarias, pruebas de integración y despliegue, todos en verde.
+
+![Pipeline CI/CD en GitHub Actions](capturas/03-github-actions-pipeline.png)
+
+**API desplegada en Render**: Swagger y health check.
+
+![Swagger desplegado](capturas/04-swagger-desplegado.png)
+
+![Health check desplegado](capturas/05-health-desplegado.png)
 
 ## 8. Seguridad (resumen)
 
