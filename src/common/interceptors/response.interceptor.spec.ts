@@ -6,6 +6,7 @@ describe('ResponseInterceptor', () => {
   const interceptor = new ResponseInterceptor<unknown>();
   const contextWithStatus = (statusCode: number) =>
     ({
+      getType: () => 'http',
       switchToHttp: () => ({ getResponse: () => ({ statusCode }) }),
     }) as unknown as ExecutionContext;
   const handler = (data: unknown): CallHandler => ({ handle: () => of(data) });
@@ -33,6 +34,13 @@ describe('ResponseInterceptor', () => {
         interceptor.intercept(contextWithStatus(204), handler(undefined)),
       ),
     ).resolves.toBeUndefined();
+  });
+
+  it('no envuelve las respuestas de GraphQL', async () => {
+    const graphql = { getType: () => 'graphql' } as unknown as ExecutionContext;
+    await expect(
+      lastValueFrom(interceptor.intercept(graphql, handler({ id: 1 }))),
+    ).resolves.toEqual({ id: 1 });
   });
 
   it('usa OK si el código no tiene texto estándar', async () => {

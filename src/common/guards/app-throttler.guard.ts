@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { GqlExecutionContext } from '@nestjs/graphql';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { esGraphql } from '../utils/request.util';
 
 interface ThrottledRequest {
   ip?: string;
@@ -22,5 +24,17 @@ export class AppThrottlerGuard extends ThrottlerGuard {
         ? `${ip}:${email.trim().toLowerCase()}`
         : ip,
     );
+  }
+
+  /** En GraphQL el request y el response vienen en el contexto de GraphQL. */
+  protected getRequestResponse(context: ExecutionContext) {
+    if (esGraphql(context)) {
+      const { req, res } = GqlExecutionContext.create(context).getContext<{
+        req: Record<string, unknown>;
+        res: Record<string, unknown>;
+      }>();
+      return { req, res };
+    }
+    return super.getRequestResponse(context);
   }
 }

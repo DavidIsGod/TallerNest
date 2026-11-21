@@ -8,8 +8,9 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../enums/role.enum';
 import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
+import { obtenerRequest } from '../utils/request.util';
 
-/** Guard global de autorización basada en roles (@Roles). */
+/** Guard global de autorización basada en roles (@Roles). REST y GraphQL. */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -21,9 +22,7 @@ export class RolesGuard implements CanActivate {
     );
     if (!roles || roles.length === 0) return true;
 
-    const user = context
-      .switchToHttp()
-      .getRequest<{ user?: AuthenticatedUser }>().user;
+    const user = obtenerRequest<{ user?: AuthenticatedUser }>(context).user;
     if (user && roles.includes(user.rol)) return true;
 
     throw new ForbiddenException('No tiene permisos para realizar esta acción');

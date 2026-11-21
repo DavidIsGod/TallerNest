@@ -9,19 +9,26 @@ import {
 import { Request, Response } from 'express';
 import { STATUS_CODES } from 'http';
 import { QueryFailedError } from 'typeorm';
+import { esGraphql } from '../utils/request.util';
 
 const PG_UNIQUE_VIOLATION = '23505';
 const PG_FOREIGN_KEY_VIOLATION = '23503';
 
 /**
- * Formato de error estándar:
+ * Formato de error estándar de REST:
  * { status, error, message, timestamp, path }
+ *
+ * En GraphQL no se escribe ninguna respuesta HTTP: se devuelve la excepción y
+ * Apollo la pone en el arreglo `errors` (con HTTP 200). El formato de ese
+ * error lo define src/graphql/formatear-error-graphql.ts.
  */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    if (esGraphql(host)) return exception;
+
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();

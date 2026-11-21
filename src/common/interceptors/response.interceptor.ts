@@ -8,6 +8,7 @@ import {
 import { Response } from 'express';
 import { STATUS_CODES } from 'http';
 import { Observable, map } from 'rxjs';
+import { esGraphql } from '../utils/request.util';
 
 export interface StandardResponse<T> {
   status: number;
@@ -20,6 +21,7 @@ export interface StandardResponse<T> {
  * Envuelve toda respuesta exitosa en el formato estándar:
  * { status, message, data, timestamp }
  * Los archivos (StreamableFile) y las respuestas 204 se envían sin envolver.
+ * GraphQL tampoco se envuelve: su respuesta siempre es { data, errors }.
  */
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<
@@ -30,6 +32,8 @@ export class ResponseInterceptor<T> implements NestInterceptor<
     context: ExecutionContext,
     next: CallHandler<T>,
   ): Observable<StandardResponse<T> | T> {
+    if (esGraphql(context)) return next.handle();
+
     const response = context.switchToHttp().getResponse<Response>();
     return next.handle().pipe(
       map((data) => {

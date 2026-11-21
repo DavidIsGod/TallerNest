@@ -2,10 +2,11 @@ import { ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { obtenerRequest } from '../utils/request.util';
 
 /**
  * Guard global: toda ruta requiere un access token válido salvo las marcadas
- * con @Public().
+ * con @Public(). Protege también el endpoint GraphQL (/graphql).
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -20,5 +21,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     ]);
     if (isPublic) return true;
     return super.canActivate(context);
+  }
+
+  /** Passport lee el header Authorization de aquí (REST o GraphQL). */
+  getRequest(context: ExecutionContext) {
+    return obtenerRequest(context);
   }
 }

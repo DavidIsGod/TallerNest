@@ -20,6 +20,7 @@ describe('HttpExceptionFilter', () => {
     json = jest.fn();
     const status = jest.fn().mockReturnValue({ json });
     host = {
+      getType: () => 'http',
       switchToHttp: () => ({
         getResponse: () => ({ status }),
         getRequest: () => ({ url: '/api/test' }),
@@ -76,6 +77,15 @@ describe('HttpExceptionFilter', () => {
     });
     filter.catch('cadena', host);
     expect(json).toHaveBeenCalledTimes(2);
+  });
+
+  it('en GraphQL devuelve la excepción sin escribir una respuesta HTTP', () => {
+    const graphqlHost = {
+      getType: () => 'graphql',
+    } as unknown as ArgumentsHost;
+    const ex = new NotFoundException('No existe');
+    expect(filter.catch(ex, graphqlHost)).toBe(ex);
+    expect(json).not.toHaveBeenCalled();
   });
 
   it('responde 500 ante QueryFailedError sin código conocido', () => {

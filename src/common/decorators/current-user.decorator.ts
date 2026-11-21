@@ -1,12 +1,11 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
 import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
+import { obtenerRequest } from '../utils/request.util';
 
 export const currentUserFactory = (
   _data: unknown,
   ctx: ExecutionContext,
-): AuthenticatedUser =>
-  ctx.switchToHttp().getRequest<Request & { user: AuthenticatedUser }>().user;
+): AuthenticatedUser => obtenerRequest<{ user: AuthenticatedUser }>(ctx).user;
 
-/** Inyecta el usuario autenticado en el handler. */
+/** Inyecta el usuario autenticado en el handler (controlador o resolver). */
 export const CurrentUser = createParamDecorator(currentUserFactory);

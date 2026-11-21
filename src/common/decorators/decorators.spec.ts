@@ -15,6 +15,7 @@ class FechaDto {
 describe('decoradores y utilidades comunes', () => {
   it('CurrentUser extrae el usuario del request', () => {
     const ctx = {
+      getType: () => 'http',
       switchToHttp: () => ({ getRequest: () => ({ user: CAREGIVER }) }),
     } as unknown as ExecutionContext;
     expect(currentUserFactory(undefined, ctx)).toBe(CAREGIVER);
