@@ -4,6 +4,7 @@ import { ContactosModule } from '../contactos/contactos.module';
 import { OpenFdaModule } from '../openfda/openfda.module';
 import { TomasModule } from '../tomas/tomas.module';
 import { Medicamento } from './entities/medicamento.entity';
+import { MedicamentosResolver } from './graphql/medicamentos.resolver';
 import { MedicamentosController } from './medicamentos.controller';
 import { MedicamentosService } from './medicamentos.service';
 
@@ -15,6 +16,7 @@ import { MedicamentosService } from './medicamentos.service';
     TomasModule,
   ],
   controllers: [MedicamentosController],
-  providers: [MedicamentosService],
+  // REST (controller) y GraphQL (resolver) comparten el MISMO servicio.
+  providers: [MedicamentosService, MedicamentosResolver],
 })
 export class MedicamentosModule {}
