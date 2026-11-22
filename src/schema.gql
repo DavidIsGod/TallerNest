@@ -1,0 +1,77 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Filtros y paginación del listado de medicamentos"""
+input FiltrosMedicamentosInput {
+  """true = activos, false = inactivos"""
+  activo: Boolean
+
+  """Busca por nombre o principio activo"""
+  nombre: String
+  pagina: Int! = 1
+  tamano: Int! = 10
+}
+
+"""Un medicamento del tratamiento del paciente"""
+type Medicamento {
+  activo: Boolean!
+
+  """Advertencias de openFDA sobre el principio activo"""
+  advertencias: [String!]!
+  dosis: String!
+
+  """Fecha de fin (YYYY-MM-DD). null = tratamiento indefinido"""
+  fechaFin: String
+
+  """Fecha de inicio (YYYY-MM-DD)"""
+  fechaInicio: String!
+  frecuencia: String!
+
+  """Horarios de toma en formato HH:mm"""
+  horarios: [String!]!
+  id: ID!
+  instrucciones: String
+  nombre: String!
+
+  """Principio activo (se usa para consultar openFDA)"""
+  principioActivo: String!
+}
+
+"""Datos para crear o editar un medicamento"""
+input MedicamentoInput {
+  dosis: String!
+  fechaFin: String
+  fechaInicio: String!
+  frecuencia: String!
+  horarios: [String!]!
+  instrucciones: String
+  nombre: String!
+  principioActivo: String!
+}
+
+type Mutation {
+  """Edita un medicamento (solo el cuidador)"""
+  actualizarMedicamento(datos: MedicamentoInput!, id: ID!): Medicamento!
+
+  """Registra un medicamento (solo el cuidador)"""
+  crearMedicamento(datos: MedicamentoInput!): Medicamento!
+
+  """Elimina (desactiva) un medicamento (solo el cuidador)"""
+  eliminarMedicamento(id: ID!): Boolean!
+}
+
+type PaginaMedicamentos {
+  items: [Medicamento!]!
+  pagina: Int!
+  totalItems: Int!
+  totalPaginas: Int!
+}
+
+type Query {
+  """Detalle de un medicamento por su id"""
+  medicamento(id: ID!): Medicamento!
+
+  """Listado paginado de medicamentos del paciente"""
+  medicamentos(filtros: FiltrosMedicamentosInput!): PaginaMedicamentos!
+}

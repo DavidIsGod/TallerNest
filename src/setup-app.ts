@@ -27,7 +27,30 @@ export function setupApp(app: INestApplication): INestApplication {
       set: (k: string, v: unknown) => void;
     }
   ).set('trust proxy', 1);
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          // Apollo Sandbox (el IDE de GET /graphql) se carga desde el CDN de Apollo.
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            'https://embeddable-sandbox.cdn.apollographql.com',
+          ],
+          frameSrc: ["'self'", 'https://sandbox.embed.apollographql.com'],
+          imgSrc: [
+            "'self'",
+            'data:',
+            'https://apollo-server-landing-page.cdn.apollographql.com',
+          ],
+          manifestSrc: [
+            "'self'",
+            'https://apollo-server-landing-page.cdn.apollographql.com',
+          ],
+        },
+      },
+    }),
+  );
   const origins = config.get<string>('CORS_ORIGINS', '*');
   app.enableCors({
     origin: origins === '*' ? true : origins.split(',').map((o) => o.trim()),
