@@ -27,6 +27,62 @@ MediPlan permite a pacientes/cuidadores registrar sus medicamentos y horarios, m
 
 ---
 
+## GraphQL (Taller *Frontend – Migración a GraphQL*)
+
+El feature **medicamentos** también se puede usar por GraphQL. Los endpoints REST siguen activos: REST y GraphQL usan **el mismo `MedicamentosService`**.
+
+| | |
+|---|---|
+| Endpoint | `POST /graphql` (sin el prefijo `/api`). Local: `http://localhost:3000/graphql` · Producción: `https://mediplan-api-sm1x.onrender.com/graphql` |
+| IDE para probar | Abra `GET /graphql` en el navegador: carga **Apollo Sandbox** |
+| Esquema | Se genera solo al arrancar en [`src/schema.gql`](src/schema.gql) (enfoque *Code First*) |
+| Autenticación | Header `Authorization: Bearer <accessToken>` (el mismo token de `POST /api/auth/login`) |
+| Variables de entorno nuevas | Ninguna |
+
+**Operaciones**
+
+| Tipo | Operación | Quién |
+|---|---|---|
+| Query | `medicamentos(filtros: FiltrosMedicamentosInput!): PaginaMedicamentos!` | Cuidador, familiar |
+| Query | `medicamento(id: ID!): Medicamento!` | Cuidador, familiar |
+| Mutation | `crearMedicamento(datos: MedicamentoInput!): Medicamento!` | Solo cuidador |
+| Mutation | `actualizarMedicamento(id: ID!, datos: MedicamentoInput!): Medicamento!` | Solo cuidador |
+| Mutation | `eliminarMedicamento(id: ID!): Boolean!` | Solo cuidador |
+
+**Cómo probarlo**
+
+1. Inicie sesión en `POST /api/auth/login` (por ejemplo con `cuidador@mediplan.com` / `Cuidador123*`) y copie el `accessToken`.
+2. Abra `http://localhost:3000/graphql`. En Apollo Sandbox, en **Headers**, agregue `Authorization` = `Bearer <accessToken>`.
+3. Escriba la operación y, en **Variables**, sus valores:
+
+```graphql
+query ListarMedicamentos($filtros: FiltrosMedicamentosInput!) {
+  medicamentos(filtros: $filtros) {
+    totalItems
+    items { id nombre dosis horarios activo }
+  }
+}
+```
+
+```json
+{ "filtros": { "pagina": 1, "tamano": 5, "activo": true } }
+```
+
+Con `curl`:
+
+```bash
+curl -X POST http://localhost:3000/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <accessToken>" \
+  -d '{"query":"query($id: ID!){ medicamento(id: $id){ nombre advertencias } }","variables":{"id":"<uuid>"}}'
+```
+
+**Errores**: GraphQL responde **HTTP 200** y el detalle va en `errors[0].extensions.code`: `UNAUTHENTICATED` (sin token o token inválido), `FORBIDDEN` (rol equivocado, p. ej. un familiar que intenta crear), `NOT_FOUND`, `BAD_REQUEST` (validación) o `INTERNAL_SERVER_ERROR`. La traducción está en [`src/graphql/formatear-error-graphql.ts`](src/graphql/formatear-error-graphql.ts).
+
+**Archivos**: `src/medicamentos/graphql/` (tipos, inputs y resolver), `src/graphql/formatear-error-graphql.ts`, la configuración en `src/app.module.ts`, y `src/common/utils/request.util.ts`, que permite que los guards globales (JWT, roles y rate limiting) y `@CurrentUser` funcionen igual en REST y en GraphQL. Pruebas: `medicamentos.resolver.spec.ts`, `formatear-error-graphql.spec.ts` y `test/graphql.e2e-spec.ts`.
+
+---
+
 ## Stack
 
 - **NestJS 11** (TypeScript, Express)
